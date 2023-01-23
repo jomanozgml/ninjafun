@@ -48,7 +48,7 @@ def fetch_vacancy(data, context):
 
     affected_doc = client.collection(collection_path).document(document_path)
 
-    affected_doc.set({
+    affected_doc.update({
         u'positionDesc': text,
         u'positionTitle': get_og_title(soup),
         u'snippet': get_og_description(soup)
