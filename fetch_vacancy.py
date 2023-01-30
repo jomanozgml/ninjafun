@@ -39,7 +39,7 @@ def fetch_vacancy(data, context):
         tags = soup.select("p, h2, h3, h4, h5, h6, ul")
         # print(tags)
         # [type(item) for item in list(soup.children)]
-        text = [item.text+'\n' for item in list(tags)]
+        text = [title+'\n'] + [item.text+'\n' for item in list(tags)]
     
     print(f'Title: {title}')
     print(text)
