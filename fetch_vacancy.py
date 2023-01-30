@@ -1,6 +1,8 @@
 import json
 from google.cloud import firestore
 from page_parser import *
+import asyncio
+from indeed_fetch import *
 client = firestore.Client()
 
 def fetch_vacancy(data, context):
@@ -18,28 +20,28 @@ def fetch_vacancy(data, context):
 
     print('\nNew value:')
     print(json.dumps(data["value"]))
-    # path_parts = context.resource.split('/documents/')[1].split('/')
-    # collection_path = path_parts[0]
-    # document_path = '/'.join(path_parts[1:])
-
-    # affected_doc = client.collection(collection_path).document(document_path)
 
     vacancy_url = data["value"]["fields"]["url"]["stringValue"]
 
     print(f'fetch url: {vacancy_url}')
 
-    soup = get_page(vacancy_url)
-
-    print(f'title: {get_og_title(soup)}')
-    print(f'desc: {get_og_description(soup)}')
-
-    tags = soup.select("p, h1, h2, h3, h4, h5, h6, strong, ul")
-
-    print(tags)
-
-    # [type(item) for item in list(soup.children)]
-    text = [item.text+'\n' for item in list(tags)]
-
+    if 'indeed' in vacancy_url:
+        async def fetch_vacancy_details():
+            page = await get_page_indeed(vacancy_url)
+            return await get_title(page), await get_description(page)
+            
+        title, text = asyncio.get_event_loop().run_until_complete(fetch_vacancy_details())
+    
+    else:
+        soup = get_page(vacancy_url)
+        title = get_og_title(soup)
+        desc = get_og_description(soup)
+        tags = soup.select("p, h2, h3, h4, h5, h6, ul")
+        # print(tags)
+        # [type(item) for item in list(soup.children)]
+        text = [item.text+'\n' for item in list(tags)]
+    
+    print(f'Title: {title}')
     print(text)
 
     path_parts = context.resource.split('/documents/')[1].split('/')
@@ -50,7 +52,6 @@ def fetch_vacancy(data, context):
 
     affected_doc.update({
         u'positionDesc': text,
-        u'positionTitle': get_og_title(soup),
-        u'snippet': get_og_description(soup)
+        u'positionTitle': title
     })
 
