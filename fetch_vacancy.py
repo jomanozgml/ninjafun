@@ -1,7 +1,6 @@
 import json
 from google.cloud import firestore
 from page_parser import *
-import asyncio
 from indeed_fetch import *
 client = firestore.Client()
 
@@ -24,23 +23,14 @@ def fetch_vacancy(data, context):
     vacancy_url = data["value"]["fields"]["url"]["stringValue"]
 
     print(f'fetch url: {vacancy_url}')
-
+    
+    # Condition to check if the url is from indeed [or dynamic webpage]
     if 'indeed' in vacancy_url:
-        async def fetch_vacancy_details():
-            page = await get_page_indeed(vacancy_url)
-            return await get_title(page), await get_description(page)
-            
-        title, text = asyncio.get_event_loop().run_until_complete(fetch_vacancy_details())
-    
+        title, text = get_details_indeed(vacancy_url)
+    # For static webpage
     else:
-        soup = get_page(vacancy_url)
-        title = get_og_title(soup)
-        desc = get_og_description(soup)
-        tags = soup.select("p, h2, h3, h4, h5, h6, ul")
-        # print(tags)
-        # [type(item) for item in list(soup.children)]
-        text = [title+'\n'] + [item.text+'\n' for item in list(tags)]
-    
+        title, text = get_page(vacancy_url)
+        
     print(f'Title: {title}')
     print(text)
 
