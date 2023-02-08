@@ -1,7 +1,7 @@
 import json
 from google.cloud import firestore
 from page_parser import *
-from indeed_fetch2 import *
+from indeed_fetch1 import *
 client = firestore.Client()
 
 def fetch_vacancy(data, context):
@@ -26,8 +26,7 @@ def fetch_vacancy(data, context):
 
     # Condition to check if the url is from indeed [or dynamic webpage]
     if 'indeed' in vacancy_url:
-        # title, text = asyncio.run(get_details_indeed(vacancy_url))
-        title, text = get_details_indeed(vacancy_url)
+        title, text = asyncio.run(get_details_indeed(vacancy_url))
     # For static webpage
     else:
         title, text = get_page(vacancy_url)

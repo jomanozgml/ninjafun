@@ -4,6 +4,14 @@ from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 
 def get_page(url):
+    """Scrapes a URL of static page using Beautiful Soup.
+    
+    Args:
+        url (string): Fully qualified URL of a page.
+    
+    Returns:
+         Title (string) and Description Text (list).
+    """
     response = urllib.request.urlopen(url)
     soup = BeautifulSoup(response, 
                          'html.parser', 
