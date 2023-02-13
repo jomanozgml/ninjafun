@@ -25,7 +25,8 @@ def fetch_vacancy(data, context):
     print(f'fetch url: {vacancy_url}')
 
     # Condition to check if the url is from indeed [or dynamic webpage]
-    if 'indeed' in vacancy_url:
+    dynamic_webpage = ['indeed', 'careerjet', 'careerone']
+    if any(x in vacancy_url for x in dynamic_webpage):
         title, text = asyncio.run(get_details_indeed(vacancy_url))
     # For static webpage
     else:

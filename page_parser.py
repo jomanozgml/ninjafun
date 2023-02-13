@@ -2,6 +2,7 @@
 import urllib.request
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
+import re
 
 def get_page(url):
     """Scrapes a URL of static page using Beautiful Soup.
@@ -19,9 +20,17 @@ def get_page(url):
     
     title = soup.title.string
     # desc is snippet of the page
-    desc = soup.find("meta", property="og:description")['content']
-    tags = soup.select("p, h2, h3, h4, h5, h6, ul")
-    # text is the list of all the text in the page
-    text = [title+'\n'] + [item.text+'\n' for item in list(tags)]
+    try:
+        position = soup.find(attrs={"data-automation": "job-detail-title"}).text
+        company = soup.find(attrs={"data-automation": "advertiser-name"}).text
+        job_type = soup.find(attrs={"data-automation": "job-detail-work-type"}).text    
+        details = soup.find(attrs={"data-automation": "jobAdDetails"}).text
+        salary = soup.find(string=re.compile(r'per annum'))
+        text = [position, company, job_type, salary, details]
+    except:
+        desc = soup.find("meta", property="og:description")['content'] or '' 
+        tags = soup.select("p, h1, h2, h3, h4, h5, h6, ul")
+        text = [item.text+'\n' for item in list(tags)]
     
+    print('extracted using bs4')
     return title, text
